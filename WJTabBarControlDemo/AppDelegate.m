@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "WJTabControl.h"
+#import "WJTabBarControl.h"
 #import "ViewController.h"
 @interface AppDelegate ()
 
@@ -29,8 +29,10 @@
     ViewController *vc3 = [[ViewController alloc]init];
     vc3.view.backgroundColor = [UIColor greenColor];
     
-    WJTabControl *tabbarControl = [[WJTabControl alloc]init];
-    [tabbarControl setViewControllers:@[vc1,vc2,vc3]];
+    UINavigationController *nav1 = [[UINavigationController alloc]initWithRootViewController:vc1];
+    
+    WJTabBarControl *tabbarControl = [[WJTabBarControl alloc]init];
+    [tabbarControl setViewControllers:@[nav1,vc2,vc3]];
     
     [tabbarControl changeItemForItemArray:^(NSArray<WJTabbarItem *> *array) {
         [array enumerateObjectsUsingBlock:^(WJTabbarItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

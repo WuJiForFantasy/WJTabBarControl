@@ -12,8 +12,8 @@
 
 @property (nonatomic,assign)CGFloat itemWidth;
 @property (nonatomic,strong)UIView *backgroudView;
-@property (nonatomic,strong)NSMutableArray *linArray;
-
+@property (nonatomic,strong)CAShapeLayer *linelayer;
+@property (nonatomic,strong)CAShapeLayer *roundLayer;
 @end
 
 @implementation WJTabBar
@@ -28,10 +28,32 @@
 }
 
 - (void)commonInit {
+  
+    [self addLineView];
+    [self addRoundView];
     self.backgroudView = [UIView new];
-    self.backgroudView.backgroundColor = [UIColor grayColor];
     [self addSubview:self.backgroudView];
     
+    self.backgroudColor = [UIColor lightGrayColor];
+    self.lineColor = [UIColor yellowColor];
+    self.showRound = YES;
+}
+
+- (void)addLineView {
+    self.linelayer = [CAShapeLayer layer];
+    UIBezierPath *path = [UIBezierPath bezierPath];
+    [path moveToPoint:CGPointMake(0, 0)];
+    [path addLineToPoint:CGPointMake(CGRectGetWidth([UIScreen mainScreen].bounds), 0)];
+    [path closePath];
+    self.linelayer.path = path.CGPath;
+    [self.layer addSublayer:self.linelayer];
+}
+
+- (void)addRoundView {
+    self.roundLayer = [CAShapeLayer layer];
+    UIBezierPath *path1 = [UIBezierPath bezierPathWithArcCenter:CGPointMake(CGRectGetWidth([UIScreen mainScreen].bounds)/2, 50/2) radius:40 startAngle:M_PI endAngle:M_PI+M_PI clockwise:YES];
+    self.roundLayer.path = path1.CGPath;
+    [self.layer addSublayer:self.roundLayer];
 }
 
 - (void)layoutSubviews {
@@ -47,9 +69,7 @@
         }
         item.frame = CGRectMake(idx*self.itemWidth, 0, self.itemWidth, itemHeight);
     }];
-    [self.linArray enumerateObjectsUsingBlock:^(UIView *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.frame = CGRectMake((idx+1)*self.itemWidth, 10, 1, frameSize.height-20);
-    }];
+
 }
 
 #pragma mark - Configuration
@@ -65,18 +85,11 @@
         [obj removeFromSuperview];
     }];
     _items = [items copy];
-    _linArray = [NSMutableArray array];
     [items enumerateObjectsUsingBlock:^(WJTabbarItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj addTarget:self action:@selector(tabBarItemWasSelected:) forControlEvents:UIControlEventTouchDown];
         [self addSubview:obj];
-        if (idx > 0) {
-            UIView *line = [UIView new];
-            line.backgroundColor = [UIColor lightGrayColor];
-            [self addSubview:line];
-            [_linArray addObject:line];
-        }else {
-//            obj.label.textColor = [UIColor lightGrayColor];
-            obj.alpha = 1;
+        if (idx == 0) {
+           obj.selected = YES;
         }
     }];
     
@@ -85,24 +98,49 @@
 #pragma mark - 事件监听
 
 - (void)tabBarItemWasSelected:(WJTabbarItem *)sender {
-    sender.alpha = 0.2;
     __block NSInteger index = 0;
     [self.items enumerateObjectsUsingBlock:^(WJTabbarItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (obj == sender) {
-            [UIView animateWithDuration:0.5 animations:^{
-//                obj.label.textColor = [UIColor lightGrayColor];
-                obj.alpha = 1;
-            }];
+            obj.selected = YES;
             index = idx;
         }else {
-            [UIView animateWithDuration:0.5 animations:^{
-//                obj.label.textColor = [UIColor blackColor];
-                obj.alpha = 1;
-            }];
+            obj.selected = NO;
         }
     }];
     self.buttonIndexBlock(index);
 }
 
+#pragma mark - public
+
+- (void)selectItemAtIndex:(NSInteger)index {
+    __block NSInteger inter = 0;
+    [self.items enumerateObjectsUsingBlock:^(WJTabbarItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (inter == index) {
+            obj.selected = YES;
+        }else {
+            obj.selected = NO;
+        }
+        inter ++;
+    }];
+}
+
+#pragma mark - seter 
+
+- (void)setLineColor:(UIColor *)lineColor {
+    _lineColor = lineColor;
+    self.linelayer.strokeColor = lineColor.CGColor;
+    self.roundLayer.strokeColor = lineColor.CGColor;
+}
+
+- (void)setBackgroudColor:(UIColor *)backgroudColor {
+    _backgroudColor = backgroudColor;
+    self.backgroudView.backgroundColor = backgroudColor;
+    self.roundLayer.fillColor = backgroudColor.CGColor;
+}
+
+- (void)setShowRound:(BOOL)showRound {
+    _showRound = showRound;
+    self.roundLayer.hidden = !showRound;
+}
 
 @end

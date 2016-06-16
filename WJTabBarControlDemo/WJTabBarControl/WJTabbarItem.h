@@ -8,13 +8,23 @@
 
 #import <UIKit/UIKit.h>
 
+
+typedef NS_ENUM(NSInteger, WJTabbarItemStyle) {
+    WJTabbarItemStyleNone,          //没有
+    WJTabbarItemStyleText,          //文字
+    WJTabbarItemStyleImage,         //图片
+    WJTabbarItemStyleTextAndImage   //文字和图片（类似系统）
+};
+
 @interface WJTabbarItem : UIControl
 
 @property (nonatomic,strong)UILabel *label;
 @property (nonatomic,strong)UIImageView *imageView;
-//@property (nonatomic,strong)
+@property (nonatomic,assign)WJTabbarItemStyle style; //样式
+
 @property (nonatomic,assign)CGFloat itemHeight;//计算高度使用
 
-@property (nonatomic,assign)BOOL hideText;//隐藏文字
+//改变点击效果
+- (void)selectAnimation:(BOOL)selected;
 
 @end
